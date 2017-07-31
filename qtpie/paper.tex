@@ -145,9 +145,9 @@ There are two main goals: First, given the public key, the private key must not 
 There is a third goal that is only applicable in the context of digital signatures: The output of the private key operation must not leak the private key. This goal is not applicable in the context of key exchange, because the adversary does not see the output of the private key operation.
 
 \subsection{Key Generation}
-Obtaining the private key from the public key must be done by guessing one of $a, a^{-1}, r$. If this were not the case, then whatever algorithm that can be used to recover any of $a, a^{-1}, r$ from $a r \mod P$ could be used to recover plaintexts from ciphertexts of the form $m k \mod P$ for random $m, k$ where one of $m, k$ is smaller then the other (but still large enough to reduce modulo $P$). It seems unlikely that such an attack exists and is faster then guessing $a, a^{-1},  r$. 
+Obtaining the private key from the public key must be done by guessing either $a$ or $a^{-1}$, or $b$ and $c$. If this were not the case, then whatever algorithm that can be used to recover any of $a, a^{-1}, b, c$ from $a b + c \mod P$ could be used to recover plaintexts from ciphertexts of the form $x y + z \mod P$ for random $x,\ y,\ z$ where one of $x,\ y$ is smaller then the other (but still large enough to reduce modulo $P$). It seems unlikely that such an attack exists and is faster then guessing either $a$ or $a^{-1}$ or $b$ and $c$. This implies that there does not exist an algorithm to recover the private key from the public key, other then brute force guessing.
 
-This implies that there does not exist an algorithm to recover the private key from the public key, other then brute force guessing.
+However, it may be the case that one does not need to recover the private key from the public key - It is possible that equivalent keys might exist that are more easily computed from the public key instead.
 
 \subsection{Public Key Operation}
 The public key operation appears to be a 1-dimensional version of the learning-with-errors problem.\\
@@ -171,9 +171,9 @@ In our implementation, most of the time for the public key operation is spent ge
 
 Key sizes and ciphertext sizes are relatively small - ciphertexts and public keys are effectively the same size as the modulus; In our implementation, ciphertexts and public keys are 1026 bits in size.
 
-Private keys are also quite small, with certain time/space tradeoffs available: In the most compact scenario for key encapsulation, the private key can require only 776 bits for storage, used to store only the short inverse $a^{-1}$ and $b$. In the worst case scenario, where each of $a^{-1},\ a,\ b,\ b^{-1},\ c$ is stored, the private key size requires 2068 bits of storage space. 
+Private keys are also quite small, with certain time/space tradeoffs available: In the most compact scenario for key encapsulation, the private key can require only 776 bits for storage, used to store only the short inverse $a^{-1}$ and $b$. In the worst case scenario, where each of $a^{-1},\ a,\ b,\ b^{-1},\ c$ is stored, the private key size requires 3112 bits of storage space. 
 
-Our implementation is optimized for clarity and readability. Much of the computation time is spent on bignum operations, and while an optimized C implementation may certainly be faster, it is not required to obtain an acceptable level of performance in the context of hybrid cryptosystems. 
+Our implementation is optimized for clarity and readability. Much of the computation time is spent on BigNum operations, and while an optimized C implementation may certainly be faster, it is not required to obtain an acceptable level of performance in the context of hybrid cryptosystems. 
 
 \section{Open Problems}
 Our results are lacking in formal rigorous proof; We do not posses the requisite skills to create such proofs. We leave it as an open problem to formally prove or dis-prove the security of the key generation function, public key operation, and private key operation.
@@ -181,6 +181,6 @@ Our results are lacking in formal rigorous proof; We do not posses the requisite
 Additionally, we do not present a standardized scheme for key encapsulation, public key encryption, or digital signatures. While there is clear and obvious potential to construct such schemes, and indeed it may even be conceptually simple to do so, it remains to be determined exactly what parameter sizes and configuration, if any, will facilitate a secure construction. This is a consequence of the lack of a formal security reduction.
 
 \section{Conclusion}
-We define a conceptually simple, resource-practical Trapdoor One-Way Function. We discuss the potential applications of such a function, and provide performance statistics from our open-source public-domain python implementation of a key encapsulation mechanism using the trapdoor function. Finally, we discuss some open problems related to formally proving the security of the algorithm and the construction of precisely standardized cryptosystems using it.
+We define a conceptually simple, resource-practical Trapdoor One-Way Function. We discuss the potential applications of such a function, and provide example performance statistics from our open-source public-domain python implementation of a key encapsulation mechanism using the trapdoor function. Finally, we discuss some open problems related to formally proving the security of the algorithm and the construction of precisely standardized cryptosystems using it.
 \end{document}
 

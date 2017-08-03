@@ -21,47 +21,40 @@
 
 \author{Ella Rose}
 \institute{Paso Robles, CA \email{python_pride@protonmail.com}}
-\title[Trapdoor One-Way Function from Encrypted Modular Inverse]{Trapdoor One-Way Function from Encrypted Modular Inverse}
+\title[Trapdoor One-Way Function from Short Modular Inverse]{Trapdoor One-Way Function from Short Modular Inverse}
 
 \begin{document}
 
 \maketitle
 
 % use optional argument because the \LaTeX command breaks the PDF keywords
-\keywords[Homomorphic Encryption, Public Key Cryptography]{Homomorphic Encryption, Public Key Cryptography}
+\keywords[homomorphic encryption, public-key cryptography]{homomorphic encryption, public-key cryptography}
 
 \begin{abstract}
- We create a simple trapdoor using an encrypted modular multiplicative inverse, and define a public and private key operation. The key generation, public key opeartion, and private key operation are all time and space efficient: We can perform tens of thousands of public and private key operations per second with a naive python implementation on modest hardware, and the keys and ciphertexts are relatively small. 
+ We present a simple trapdoor function using a short modular multiplicative inverse, and define a cryptosystem based on it. The key generation, public key operation, and private key operation are all time and space efficient: We can perform tens of thousands of public and private key operations per second with a naive python implementation on modest hardware, and the keys and ciphertexts are relatively small. 
  \end{abstract}
-
-\todototoc
-\listoftodos
-
-How does all this compares to others methods ?
 
 \section{Introduction}
 A Trapdoor One-Way Function (TOWF) is a function that is easy to compute in one direction, but is hard to compute in reverse without some additional piece of information. TOWFs are useful for cryptography, because they make the construction of various public key primitives much simpler.
 
-A \todo{what kind of problem?} problem takes the form $a s + e \mod P$, where $a$ and $P$ are known and $s$ and $e$ are secret, random values.
+In this paper, we define a candidate TOWF based on a simple observation of the congruence of $a^{-1}(a s + e) \equiv s + a^{-1} e \mod P$, combined with some subtle manipulation of the sizes of the numbers involved. The trapdoor information is the short inverse $a^{-1}$, which allows the recovery of $s$ and $e$ from a point $a s + e \mod P$, provided some constraints on the sizes of numbers are satisfied.
 
-In this paper, we define a candidate TOWF based on \todo{what kind?} problem. It is based on a simple observation of the congruence of $a^{-1}(a s + e) \equiv s + a^{-1} e \mod P$, combined with some subtle manipulation of the sizes of the numbers involved. The trapdoor information is the short inverse $a^{-1}$, which allows the recovery of $s$ and $e$ from a point $a s + e \mod P$, provided some constraints on the sizes of numbers are satisfied.
-
-We discuss the use of TWOFs to construct basic public key algorthims for encapsulating keys, public key encryption, and creating digital signatures. Furthermore we provide time and space measurements for an implementation key encapsulation mechanism, gathered using our open source public domain implementation of the algorithm. We conclude with some open problems about formal security proof for the algorithm.
+We discuss the use of TOWFs to construct basic public key algorthims for encapsulating keys, public key encryption, and creating digital signatures. Furthermore we provide time and space measurements for an implementation of a key encapsulation mechanism, gathered using our open source public domain implementation of the algorithm. We conclude with some open problems about formal security proof for the algorithm.
 
 \subsection{Definitions}
-We use $+$ to denote addition, $a b$ to indicate multiplication, $a / b$ to denote division, and $\mod P$ to denote the modulo operation. We use $\leftarrow$ to indicate the assignment of a value to a name. We use the function $inverse(k, P)$ to indicate the computation of the modular multiplicative inverse of $k \mod P$. We use the function $random(k)$ to indicate the generation of of a random $k$-bit integer. We write application of the public key operation as $key_{pub}(s,\ e)$, and application of the private key operation as $key_{priv}(c)$.
+We use $+$ to denote addition, $a b$ to indicate multiplication, $a / b$ to denote division, and $\mod P$ to denote the modulo operation. We use $\leftarrow$ to indicate the assignment of a value to a name. We use the function $inverse(k, P)$ to indicate the computation of the modular multiplicative inverse of $k \mod P$. We use the function $random(k)$ to indicate the generation of of a random $k$-bit integer.
 
 \section{Algorithm}
-There is a publicly agreed upon modulus $P$. All math is done in the finite field of integers modulo $P$. The same $P$ may always be used. It should be prime; it is not secret, and otherwise only needs to be both agreed upon and large enough. The size of $P$ is determined by the rest of the parameter sizes which are discussed below. In our python implementation that targets a 256-bit security level, $P$ is 1040 bits in size. The larger $P$ is, the longer the BigNum arithmetic operations take, and the larger ciphertexts become; Consequently, we opt for the smallest $P$ possible.
+There is a publicly agreed upon modulus $P$. All math is done in the finite field of integers modulo $P$. The same $P$ may always be used. It should be prime; it is not secret, and otherwise only needs to be both agreed upon and large enough. The size of $P$ is determined by the rest of the parameter sizes which are discussed below. In our python implementation that targets a 256-bit security level, $P$ is 1026 bits in size..
 
-\subsection{Design Outline}
+\subsection{Trapdoor One-Way Function}
 Consider the following expression,
 
 \begin{flalign*}
 c \leftarrow a s + e \mod P,
 \end{flalign*}
 
-We refer to this expression as the public key operation. If the expression $a s + e$ were over integers instead of modulo $P$, then we could recover $e$ simply by performing $c \mod a$; We could similarly recover $s$ by performing $c / a$. However, since $a s > P$ then this will no longer work. 
+If the expression $a s + e$ were over integers instead of modulo $P$, then we could recover $e$ simply by performing $c \mod a$; We could similarly recover $s$ by performing $c / a$. However, since $a s > P$ then this will no longer work. 
 
 Given $c, a, P$, we can recover $s, e$ using the following algorithm:
 
@@ -76,30 +69,32 @@ where $a^{-1}$ is the output of $inverse(a, P)$.
 
 The step $s \leftarrow t \mod a^{-1}$ will only function correctly if $s < a^{-1}$ and if $a^{-1} e < P$. We leverage this latter fact to create the trapdoor: We select a suitable $a^{-1}$ that is large enough such that $s < a^{-1}$ and small enough such that $a^{-1} e < P$. Then, we calculate the modular multilicative inverse $a \leftarrow inverse(a^{-1}, P)$. This number will likely be very large, closer to $P$ in size then to $a^{-1}$. 
 
+\subsection{Cryptosystem}
+\subsubsection{Key Generation}
 To create a public key, we then encrypt $a$ via $k_{public} \leftarrow a b + c$ to preclude the ability of others to calculate $a^{-1}$. The additional $b$ and $c$ terms increase the complexity of the private key operation by a small margin, but do not influence the complexity of the public key operation.
 
-\subsection{Key Generation}
 \begin{flalign*}
-a^{-1} \leftarrow random(priv_{size})\\
+a^{-1} \leftarrow random(a^{-1}_{size})\\
 a \leftarrow inverse(a^{-1}, P)\\
 b \leftarrow random(b_{size})\\
 c \leftarrow random(c_{size})\\
 k_{private} \leftarrow a^{-1},\ a,\ b,\ c\\
-k \leftarrow a b + c\\
+k_{public} \leftarrow a b + c\\
 \end{flalign*}
 
-For the trapdoor to function correctly, $priv_{size}$ must be selected such that $a^{-1}(cs + e) < P$, as well as $a^{-1} > s b$, where $s, e$ are the security parameters of the public key operation. If we select 256-bits as the floor for the size of $s$, $e$, $b$, $c$, then $priv_{size}$ will need to be at least 513 bits, while $P$ will need to be 1026 bits. The size of the modulus effectively determines the size of the public key.
+For the trapdoor to function correctly, $a^{-1}_{size}$ must be selected such that $a^{-1}(cs + e) < P$, as well as $a^{-1} > s b$, where $s, e$ are the security parameters of the public key operation. If we select 256-bits as the floor for the size of $s$, $e$, $b$, $c$, then $a^{-1}_{size}$ will need to be 513 bits, while $P$ will need to be 1026 bits. The size of the modulus effectively determines the size of the public key.
 
-\subsection{Public Key Operation}
+\subsubsection{Public Key Operation}
 \begin{flalign*}
+k \leftarrow k_{public}\\
 s \leftarrow random(s_{size})\\
 e \leftarrow random(e_{size})\\
 ciphertext \leftarrow k s + e\\
 \end{flalign*}
 
-Assuming the parameter sizes discussed in the key generation section, then $s_{size}$ is 256 bits, while $e_{size}$ is 512 bits. The size of the ciphertext is effectively determined by the size of the modulus.
+Assuming the parameter sizes discussed in the key generation section, then $s_{size}$ is 256 bits, while $e_{size}$ can accomodate 512 bits. The size of the ciphertext is effectively determined by the size of the modulus.
 
-\subsection{Private Key Operation}
+\subsubsection{Private Key Operation}
 
 \begin{flalign*}
 t \leftarrow a^{-1} ciphertext\\
@@ -112,7 +107,9 @@ output\ s,\ e
 
 The private key operation presented here is slightly more complex than the example demonstrated earlier because of the presence of the $b$ and $c$ terms. 
 
-\subsection{Homomorphism}
+Not all applications will require the recovery of both $s$ and $e$ - for example, recovery of $s$ alone can be sufficient to establish symmetric keys. This also implies that storage of the entire private key is also unnecessary in some situations.
+
+\subsubsection{Homomorphism}
 Ciphertexts support integer addition: Two ciphertexts of the form $a s + e$ may be added together to yield $a (s_1 + s_2) + e_1 + e_2$. 
 
 Ciphertexts may be multiplied by plaintext scalars - this follows from the previous property, as $c + c \equiv 2c$.
@@ -132,40 +129,40 @@ We can generalize and say that the Key Encapsulation Mechanism presented in the 
 
 Considering the efficiency of hybrid cryptosystems, where an asymmetric algorithm is used to establish a key for a message, then a symmetric cipher is used to perform the actual encryption, we first must determine what can be gained by storing a message inside the public key ciphertext.
 
-The most attractive feature is probably the homomorphism - the ability to add and manipulate ciphertexts can enable more complex cryptographic schemes and protocols. However, the manner with which plaintext information is stored and possibly padded will influence the nature of the homomorphic properties, and a careful configuration will be required to preserve the desired relationship(s). For example, if $e$ is used to store the message, then plaintext adjustments may be made to the resultant ciphertext; However, if $s$ is used as to store the message, then the ciphertext will no longer facilitate plaintext adjustments. Additionally, not all such configurations may be secure.
+The most attractive feature is the homomorphism - the ability to add and manipulate ciphertexts can enable more complex cryptographic schemes and protocols. However, the manner with which plaintext information is stored and possibly padded will influence the nature of the homomorphic properties, and a careful configuration will be required to preserve the desired relationship(s). For some examples: if $e$ is used to store the message, then plaintext adjustments may be made to the resultant ciphertext; However, if $s$ is used as to store the message, then the ciphertext will no longer facilitate plaintext adjustments. If multiplication by plaintext is needed, larger parameters will be required.
+
+Not all such configurations may be secure, and each particular design should receive careful analysis.
 
 \subsection{Digital Signatures}
-A TWOF can serve as a fundamental part of a digital signature scheme: The private key operation can be used to produce a preimage for a given ciphertext, and the corresponding public key can be used to check if the preimage outputs the challenge ciphertext. 
+A TWOF can serve as a basis for of a digital signature scheme: The private key operation can be used to produce a preimage for a given block of data as if it were a ciphertext, and the corresponding public key can be used to check if the preimage outputs the challenge ciphertext. 
 
-We note that ciphertexts produced by the TWOF are additively homomorphic - this means that signatures will possess this quality as well. Usually this feature can be removed by incorporating a hash function into the signature process and padding the result before applying the private key signing operation. 
+We note that ciphertexts produced by the TWOF support integer addition - this means that signatures will possess this quality as well. Usually this feature can be removed by incorporating a hash function into the signature process and padding the result before applying the private key signing operation. 
 
 \section{Security Analysis}
-There are two main goals: First, given the public key, the private key must not be obtainable; Second, The output of the public key operation must not be invertible without the private key.
+There are two main goals related to the security of the proposed cryptosystem: First, given the public key, the private key must not be obtainable; Second, The output of the public key operation must not be invertible without the private key.
 
 There is a third goal that is only applicable in the context of digital signatures: The output of the private key operation must not leak the private key. This goal is not applicable in the context of key exchange, because the adversary does not see the output of the private key operation.
 
 \subsection{Key Generation}
 Obtaining the private key from the public key must be done by guessing either $a$ or $a^{-1}$, or $b$ and $c$. If this were not the case, then whatever algorithm that can be used to recover any of $a, a^{-1}, b, c$ from $a b + c \mod P$ could be used to recover plaintexts from ciphertexts of the form $x y + z \mod P$ for random $x,\ y,\ z$ where one of $x,\ y$ is smaller then the other (but still large enough to reduce modulo $P$). It seems unlikely that such an attack exists and is faster then guessing either $a$ or $a^{-1}$ or $b$ and $c$. This implies that there does not exist an algorithm to recover the private key from the public key, other then brute force guessing.
 
-However, it may be the case that one does not need to recover the private key from the public key - It is possible that equivalent keys might exist that are more easily computed from the public key instead.
+However, it may be the case that one does not need to recover the private key from the public key - It is possible that equivalent keys might exist that are more easily computed from the public key instead. We do not know how to dis-prove the existence of such a possibility.
 
 \subsection{Public Key Operation}
-The public key operation appears to be a 1-dimensional version of the learning-with-errors problem.\\
-
 We will first consider the case where $e \leftarrow random(1)$. The task of the adversary is to recover $e$, given $a,\ a s + e$ for $a \leftarrow \{0,\ \dots,\ P\}$, $s \leftarrow \{0,\ \dots,\ P\}$. If an adversary can guess the least significant bit of $a s$, then they can obtain $e$ from $a s + e$.
 
-If we consider the case where $a = 1$, then $a s + e \equiv s + e \mod P$ for uniformly random values $s, e$. Recovering $s,\ e$ in this situation is clearly intractable.
+If we consider 8-bit $a, s$ values and $P = 257$, then we can evaluate the function $a s \mod P$ on values $\{0,\dots,\ 256\}$ and produce an 8-bit s-box, like the kind used in symmetric cryptography. We can then analyze the result with the same techniques and tools. We have done so and found differentials ranging from probability $62/256$ in the worst case, to around $64/256$ in the average case, to $254/256$ in the worst case. However, considering that each ciphertext $a s + e$ uses an independent, random $s$ and $e$, it is not clear how to select a differential to try to exploit. Additionally, real instances of the problem will use $a,\ s$ values that are much larger then any tool for analyzing s-boxes can handle.
 
-If we consider 8-bit $a, s$ values and $P = 257$, then we can evaluate the function $a s$ on values $\{0,\dots,\ 256\}$ and produce an 8-bit s-box, like the kind used in symmetric cryptography. We can then analyze the result with the same techniques and tools. We have done so and found differentials ranging from probability $62/256$ in the worst case, to around $64/256$ in the average case, to $254/256$ in the worst case. However, considering that each ciphertext $a s + e$ uses a unique, random $s$, it is not clear how to select a differential to try to exploit. Additionally, real instances of the problem will use $a,\ s$ values that are much larger then any tool for analyzing s-boxes can handle.
+If we consider the case where $a = 1$, then $a s + e \equiv s + e \mod P$ for uniformly random values $s, e$. Recovering $s$ and the lower bits of $e$ in this situation is clearly intractable. Because we use an $e$ that is twice as many bits large as $s$, then the upper bits of $e$ would be exposed in such a situation. However, the exposed bits are not usable to recover any information about $s$ or the lower bits of $e$.
 
 \subsection{Private Key Operation}
-Utilizing the TWOF here as a signature function does not provide the same confidence as using the TWOF for key exchange: With the private key operation, the expressions do not take the form of the LWE problem. Despite this, it is not obvious to us how to take advantage of this fact to recover the private key.
+With the private key operation, the expressions do not appear to take the form of a known hard problem. Despite this, it is not obvious to us how to take advantage of this fact to recover the private key. 
 
 \subsection{Side Channel Analysis}
 Assuming that BigNum operations can be implemented in a manner that does not leak timing information, it appears that a naive implementation of the algorithm is resistant to timing side channel analysis, as there are no tables or branches in the algorithm.
 
-\section{Metrics}
-We have implemented the trapdoor and developed a key encapsulation mechanism with it. Using our open-source public-domain python implementation that is configured for the 256-bit security level outlined in this paper, we can perform 10,000 public key operations in 1 second. We can perform roughly 30,000 private key operations per second. Our tests were performed on modest hardware, namely an Intel Celeron N2830 2.16GHz with 2 cores. 
+\subsection{Metrics}
+We have implemented the trapdoor and a key encapsulation mechanism using it. Using our open-source public-domain python implementation\footnote{http://bit.ly/2uW7l92} that is configured for the 256-bit security level outlined in this paper, we can perform 10,000 public key operations in 1 second. We can perform roughly 30,000 private key operations per second. Our tests were performed on modest hardware, namely an Intel Celeron N2830 2.16GHz. 
 
 In our implementation, most of the time for the public key operation is spent generating $s$ and $e$. In a synthetic test where $s, e$ are not generated for each invocation of the function, we can perform 100,000 public key operations per second.
 
@@ -176,11 +173,18 @@ Private keys are also quite small, with certain time/space tradeoffs available: 
 Our implementation is optimized for clarity and readability. Much of the computation time is spent on BigNum operations, and while an optimized C implementation may certainly be faster, it is not required to obtain an acceptable level of performance in the context of hybrid cryptosystems. 
 
 \section{Open Problems}
-Our results are lacking in formal rigorous proof; We do not posses the requisite skills to create such proofs. We leave it as an open problem to formally prove or dis-prove the security of the key generation function, public key operation, and private key operation.
+Our results are lacking in formal rigorous proof; We do not posses the requisite skills to create such proofs. We leave it as an open problems to formally prove or dis-prove the one-wayness of the trapdoor function, and the security of the cryptosystem.
 
-Additionally, we do not present a standardized scheme for key encapsulation, public key encryption, or digital signatures. While there is clear and obvious potential to construct such schemes, and indeed it may even be conceptually simple to do so, it remains to be determined exactly what parameter sizes and configuration, if any, will facilitate a secure construction. This is a consequence of the lack of a formal security reduction.
+Additionally, while we do present an example cryptosystem, we do not present any standardized schemes for key encapsulation, public key encryption, or digital signatures. While there is clear and obvious potential to construct such schemes, and indeed it may even be conceptually simple to do so, it remains to be determined exactly what parameter sizes and configuration, if any, will facilitate a provably secure construction. This is a consequence of the lack of a formal security reduction. 
+
+There may exist more efficient parameter configuration for the presented cryptosystem. 
 
 \section{Conclusion}
 We define a conceptually simple, resource-practical Trapdoor One-Way Function. We discuss the potential applications of such a function, and provide example performance statistics from our open-source public-domain python implementation of a key encapsulation mechanism using the trapdoor function. Finally, we discuss some open problems related to formally proving the security of the algorithm and the construction of precisely standardized cryptosystems using it.
-\end{document}
 
+
+\section*{Acknowledgements}
+
+We would like to thank Mykos Hudson-Crisp for comments/editing and Brian Degnan for reviewing/editing our paper.
+
+\end{document}

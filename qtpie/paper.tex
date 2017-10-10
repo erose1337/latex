@@ -118,7 +118,10 @@ Additionally, adjustments may be made to the value of $e$ via addition/subtracti
 
 It should be noted that multiplication will quickly increase the size of the terms in the expressions, and if the size of the terms grows too large, decryption will fail.
 
-\section{Key Encapsulation, Public Key Encryption, and Digital Signatures}
+\section{Fully Homomorphic Encryption, Key Encapsulation, Public Key Encryption, and Digital Signatures}
+\subsection{Fully Homomorphic Encryption}
+A short modular inverse can be used to instantiate a cipher that is effectively identical to the construction presented in \cite{Fully Homomorphic Encryption Over The Integers}, with the exception that operations from such a variant will take place over finite fields as opposed to over Integers. 
+
 \subsection{Key Encapsulation}
 Given a TWOF, a basic algorithm to exchange keys can be constructed as follows: Assuming that Alice has Bob's public key already, she simply applies the public key operation to a random value and sends the output to Bob; Bob can then use the private key to recover the random value. Assuming that both parties are honest, then the random value will be unknown to all parties but Alice and Bob, and they can use this information to construct a secured communications channel.
 
@@ -185,6 +188,6 @@ We define a conceptually simple, resource-practical Trapdoor One-Way Function. W
 
 \section*{Acknowledgements}
 
-We would like to thank Mykos Hudson-Crisp for comments/editing and Brian Degnan for reviewing/editing our paper.
+We would like to thank Beno\^it Viguier, Mykos Hudson-Crisp, and Brian Degnan for reviewing/editing our paper.
 
 \end{document}

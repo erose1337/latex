@@ -1,0 +1,115 @@
+\documentclass[preprint]{iacrtrans}
+\usepackage[utf8]{inputenc}
+
+% Select what to do with todonotes: 
+% \usepackage[disable]{todonotes} % notes not showed
+\usepackage[draft,color=orange!20!white,linecolor=orange,textwidth=3cm,colorinlistoftodos]{todonotes}   % notes showed
+\setlength{\marginparwidth}{3cm}
+\usepackage{graphicx}
+\usepackage{soul}
+\graphicspath{{images/}} % end dirs with `/'
+% \usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows}
+\usetikzlibrary{crypto.symbols}
+\tikzset{shadows=no}        % Option: add shadows to XOR, ADD, etc.
+
+\author{Ella Rose}
+\institute{Paso Robles, CA \email{python_pride@protonmail.com}}
+\title[Lattice Trapdoor from Short Modular Inverse and Noisy Modulus]{Lattice Trapdoor from Short Modular Inverse and Noisy Modulus}
+
+\begin{document}
+
+\maketitle
+
+% use optional argument because the \LaTeX command breaks the PDF keywords
+\keywords[homomorphic encryption, public-key cryptography]{homomorphic encryption, public-key cryptography}
+
+\begin{abstract}
+
+ \end{abstract}
+
+\section{Introduction}
+
+\subsection{Definitions}
+$a \leftarrow$ indicates the assignment of a value\\
+$a + b$ indicates integer addition\\
+$a b$ indicates integer multiplication\\
+$a \mod b$ indicates modular reduction\\
+$a / b$ indicates integer division\\
+$random(size)$ indicates generation of a random $size$-bit integer\\
+$inverse(a, b)$ indicates computation of the modular multiplicative inverse of $a$ modulo $b$\\
+
+\section{Short Modular Inverses and Noisy Moduli}
+$a^{-1} (a s + e) = s + a^{-1} e \mod q\\$
+$log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\$
+$log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\$
+A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ once the problem is over integers.
+
+The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
+
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $a$ and $q$, instead $a, q + r$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not usable to shrink the value.
+
+When working modulo $q$ on a value that was reduced modulo $q + r$, noise will be present in the result. The value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. 
+
+\section{Public Key Cryptosystem}
+A private key consists of a relatively small value $a^{-1}$ and a secret modulus $q$. A public key consists of the modular inverse of $a^{-1}$ modulo $q$ and a noisy version of the modulus $q_r$.  
+
+The public key operation consists of selecting a random point $s$ on the $a$ lattice, adding some large error term $e$, then applying modular reduction by the modulus $q_r$.
+
+The private key operation consists of multiplication by the short inverse $a^{-1}$ modulo $q$, followed by modulo $a^{-1}$. The multiplication by the short inverse changes the value to the point $e$ on the $a^{-1}$ lattice, with an error of $s$. This shrinks the size of the value to where it is effectively over integers, which allows the recovery of $s$ via simple modular reduction by $a^{-1}$.
+
+\subsection{Key Generation}
+\begin{flalign*}
+a^{-1} \leftarrow random(a^{-1}_{size})\\
+q \leftarrow random(q_{size})\\
+a \leftarrow modular\_inverse(a^{-1}, q)\\
+q_r \leftarrow q + random(r_{size})\\
+key_{private} \leftarrow a^{-1},\ q\\
+key_{public} \leftarrow a, q_r
+\end{flalign*}
+
+\subsection{Public Key Operation}
+\begin{flalign*}
+s \leftarrow random(s_{size})\\
+e \leftarrow random(e_{size})\\
+c \leftarrow a s + e \mod q_r
+\end{flalign*}
+
+\subsection{Private Key Operation}
+\begin{flalign*}
+s \leftarrow a^{-1} c \mod q \mod a^{-1}
+\end{flalign*}
+
+\subsection{Homomorphism}
+
+\subsection{Parameter Sizes}
+
+
+\section{Somewhat Homomorphic Secret Key Cryptosystem}
+\subsection{Key Generation}
+
+\subsection{Encryption}
+
+\subsection{Decryption}
+
+\subsection{Homomorphism}
+
+
+\section{Security Analysis}
+
+\section{Metrics}
+
+\section{Open Problems}
+
+\section{Conclusion}
+
+
+\section*{Acknowledgements}
+
+\end{document}

@@ -38,6 +38,7 @@
 
 \subsection{Definitions}
 $a \leftarrow$ indicates the assignment of a value\\
+$a \rightarrow b$ indicates that if $a$ is a true statement, $b$ is a consequence of it\\
 $a + b$ indicates integer addition\\
 $a b$ indicates integer multiplication\\
 $a \mod b$ indicates modular reduction\\
@@ -53,9 +54,7 @@ A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via mu
 
 The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not usable to shrink the value.
-
-When working modulo $q$ on a value that was reduced modulo $q + r$, noise will be present in the result. The value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. 
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not be usable to shrink the value.
 
 \section{Public Key Cryptosystem}
 A private key consists of a relatively small value $a^{-1}$ and a secret modulus $q$. A public key consists of the modular inverse of $a^{-1}$ modulo $q$ and a noisy version of the modulus $q_r$.  
@@ -97,6 +96,7 @@ s_3 \equiv s_1 + s_2
 \end{flalign*}
 
 \subsection{Parameter Sizes}
+When working modulo $q$ on a value that was reduced modulo $q + r$, noise will be present in the result. The value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. 
 
 \section{Security Analysis}
 

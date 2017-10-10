@@ -49,11 +49,11 @@ $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $
 $a^{-1} (a s + e) = s + a^{-1} e \mod q\\$
 $log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\$
 $log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\$
-A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ once the problem is over integers.
+A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
 The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $a$ and $q$, instead $a, q + r$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not usable to shrink the value.
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not usable to shrink the value.
 
 When working modulo $q$ on a value that was reduced modulo $q + r$, noise will be present in the result. The value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. 
 
@@ -68,7 +68,7 @@ The private key operation consists of multiplication by the short inverse $a^{-1
 \begin{flalign*}
 a^{-1} \leftarrow random(a^{-1}_{size})\\
 q \leftarrow random(q_{size})\\
-a \leftarrow modular\_inverse(a^{-1}, q)\\
+a \leftarrow inverse(a^{-1}, q)\\
 q_r \leftarrow q + random(r_{size})\\
 key_{private} \leftarrow a^{-1},\ q\\
 key_{public} \leftarrow a, q_r
@@ -87,23 +87,23 @@ s \leftarrow a^{-1} c \mod q \mod a^{-1}
 \end{flalign*}
 
 \subsection{Homomorphism}
+Ciphertexts may be added together, and the result upon decryption will be equal to the sum of the plaintexts.
+\begin{flalign*}
+c_1 \leftarrow a s_1 + e_1 \mod q_r\\
+c_2 \leftarrow a s_2 + e_2 \mod q_r\\
+c_3 \leftarrow c_1 + c_2\\
+s_3 \leftarrow a^{-1} c_3 \mod q \mod a^{-1}\\
+s_3 \equiv s_1 + s_2
+\end{flalign*}
 
 \subsection{Parameter Sizes}
-
-
-\section{Somewhat Homomorphic Secret Key Cryptosystem}
-\subsection{Key Generation}
-
-\subsection{Encryption}
-
-\subsection{Decryption}
-
-\subsection{Homomorphism}
-
 
 \section{Security Analysis}
 
 \section{Metrics}
+
+\section{Fully Homomorphic Encryption Over Finite Fields}
+It is possible to use a short inverse and modulus to instatiate the scheme from Fully Homomorphic Encryption Over The Integers. This would make the ciphertexts a value in a finite fields instead of integers, which can shrink the required space by a considerable amount.
 
 \section{Open Problems}
 

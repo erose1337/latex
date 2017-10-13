@@ -47,14 +47,16 @@ $random(size)$ indicates generation of a random $size$-bit integer\\
 $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $a$ modulo $b$\\
 
 \section{Short Modular Inverses and Noisy Moduli}
-$a^{-1} (a s + e) = s + a^{-1} e \mod q\\$
-$log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\$
-$log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\$
+$a^{-1} (a s + e) = s + a^{-1} e \mod q\\ \\$
+$log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\ \\$
+$log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\ \\$
 A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
 The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not be usable to shrink the value.
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not be usable to shrink the value. 
+
+It is possible to operate on an element of a field $q$ as if it were an element of $q_r$ and obtain approximately correct results. Some noise will be present, and the value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise is small enough, it will not impede the ability to recover $s$.
 
 \section{Public Key Cryptosystem}
 A private key consists of a relatively small value $a^{-1}$ and a secret modulus $q$. A public key consists of the modular inverse of $a^{-1}$ modulo $q$ and a noisy version of the modulus $q_r$.  
@@ -96,14 +98,26 @@ s_3 \equiv s_1 + s_2
 \end{flalign*}
 
 \subsection{Parameter Sizes}
-When working modulo $q$ on a value that was reduced modulo $q + r$, noise will be present in the result. The value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. 
+The sizes of the parameters need to be selected carefully to ensure that:\\
+- the mechanism functions correctly (i.e. negligible probability of decryption failure)\\
+- the mechanism is secure\\
 
-\section{Security Analysis}
+The first requirement is relatively simple to fulfill, and all the parameter sizes can be described by a few simple expressions. 
+The requirements for correctness are:\\
+$log(a^{-1}) > log(s)\\$
+$log(e) <  log(q) - log(a^{-1})\\$
+$log(r) < log(e) - log(s)$
 
-\section{Metrics}
+The second requirement requires a quantatative evaluation that takes into account how the difficulty of the problem scales as the size of the error is increased relative to the size of the modulus. It is easy to see that if $log(e) >= log(q)$, then the cipher is effectively a one time pad, as there is at least one bit of random information per message bit. The construction here cannot be instantiated with such parameters while still fulfilling the first requirement of correctness, as we specifically require $log(e) < log(q)$. 
+
+However, it can be instantiated with very large error terms relative to the size of the modulus. The limiting factor of the size of $e$ is how large $s$ is. As a secret value, it needs to be large enough to preclude an adversaries ability to guess it. This implies that for most uses, $s$ will be a maximum of 256 bits in size. The size of $q$ and $e$ can then be set such that the $s$ term becomes neglible in size and $e$ becomes approximately the same size as $q$.
+
+\subsection{Security Analysis}
+
+\subsection{Metrics}
 
 \section{Fully Homomorphic Encryption Over Finite Fields}
-It is possible to use a short inverse and modulus to instatiate the scheme from Fully Homomorphic Encryption Over The Integers. This would make the ciphertexts a value in a finite fields instead of integers, which can shrink the required space by a considerable amount.
+It is possible to instatiate the scheme from Fully Homomorphic Encryption Over The Integers over finite fields instead. This could shrink the space requirements by a considerable amount.
 
 \section{Open Problems}
 

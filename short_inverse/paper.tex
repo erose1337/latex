@@ -151,6 +151,9 @@ q_{size} \leftarrow 8192\\
 r_{size} \leftarrow 8151
 \end{flalign*}
 
+\subsection{Compression}
+The modulus $q$ and the noise $r$ can be selected such that the lower bits of $q_r$ are all zero. This can shrink the size of the modulus by $r_{size}$ bytes, as the zeros can be easily compressed. The compression/decompression algorithms are simply right shifting and left shifting, respectively. This effectively shrinks the size of the public key by almost half.
+
 \subsection{Security Analysis}
 \todo{}
 

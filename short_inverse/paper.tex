@@ -51,7 +51,7 @@ $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $
 $a^{-1} (a s + e) = s + a^{-1} e \mod q\\ \\$
 $log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q = s + a^{-1} e\\ \\$
 $log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\ \\$
-A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
+A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with the modular multiplicative inverse of $a$, $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
 The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
 

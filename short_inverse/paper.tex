@@ -21,7 +21,7 @@
 
 \author{}
 \institute{}
-\title[Lattice Trapdoor from Short Modular Inverse and Noisy Modulus]{Lattice Trapdoor from Short Modular Inverse and Noisy Modulus}
+\title[Short Inverses and Noisy Moduli]{Short Inverses and Noisy Moduli}
 
 \begin{document}
 
@@ -31,7 +31,7 @@
 \keywords[homomorphic encryption, public-key cryptography]{homomorphic encryption, public-key cryptography}
 
 \begin{abstract}
-\todo{}
+ A short modular inverse is a number $a$ such that $log(a) < log(inverse(a,\ q))$ by a significant margin. Short modular inverses can serve as the basis for a somewhat homomorphic secret-key cipher, offering a variant of the cipher from Fully Homomorphic Encryption Over The Integers \todo{cite FHEOTI} that operates over finite fields instead. When combined with noisy moduli, short inverses can be used to create a public-key cryptosystem, as well as a key escrow mechanism for an approximate key agreement scheme. 
  \end{abstract}
 
 \section{Introduction}
@@ -49,15 +49,15 @@ $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $
 
 \section{Short Modular Inverses and Noisy Moduli}
 $a^{-1} (a s + e) = s + a^{-1} e \mod q\\ \\$
-$log(a^{-1}) + log(e) < log(q) \rightarrow s + a^{-1} e \mod q = s + a^{-1} e\\ \\$
+$log(a^{-1} e) < log(q) \rightarrow s + a^{-1} e \mod q = s + a^{-1} e\\ \\$
 $log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\ \\$
-A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with the modular multiplicative inverse of $a$, $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the total size of the value will shrink, assuming appropriate sizes for the values involved. With the right parameter choices, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
+A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with the modular multiplicative inverse of $a$, $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the value will shrink, assuming appropriate sizes for the values involved. With the right parameter sizes, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
-The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge then, is how to distribute $a, q$ such that nobody can recover the short modular inverse $a^{-1}$ from the pair? 
+The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge in creating a public-key cryptosystem is how to distribute $a$ such that nobody can recover the short inverse $a^{-1}$.
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $(a, q)$, $(a, q + r)$ may be distributed. The addition of the noise $r$ in the modulus prevents the computation of the short inverse $a^{-1}$; Anyone may calculate the inverse of $a \mod q + r$, but this value will most likely be approximately the size of the modulus and not be usable to shrink the value. 
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $inverse(a^{-1}, q)$, we can distribute $inverse(a^{-1}, q + k)$.
 
-It is possible to operate on an element of a field $q$ as if it were an element of $q_r$ and obtain approximately correct results. Some noise will be present as a result, and the value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $r (x / q)$ is no larger then the error $e$, it will not impede the ability to recover $s$.
+It is possible to operate on an element of a field (or ring) $q$ as if it were an element of $q + k$ and obtain approximately correct results. Some noise will be present as a result, and the value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $r (x / q)$ is no larger then the error $e$, it will not impede the ability to recover $s$.
 
 \section{Public Key Cryptosystem}
 A private key consists of a relatively small value $a^{-1}$ and a secret modulus $q$. A public key consists of the modular inverse of $a^{-1}$ modulo $q$ and a noisy version of the modulus $q_r$.  
@@ -151,8 +151,12 @@ q_{size} \leftarrow 8192\\
 r_{size} \leftarrow 8151
 \end{flalign*}
 
-\subsection{Compression}
+\subsection{Optimization}
 The modulus $q$ and the noise $r$ can be selected such that the lower bits of $q_r$ are all zero. This can shrink the size of the modulus by $r_{size}$ bytes, as the zeros can be easily compressed. The compression/decompression algorithms are simply right shifting and left shifting, respectively. This effectively shrinks the size of the public key by almost half.
+
+Similarly, the least significant bits of the ciphertext may simply be discarded instead of adding an error term. This shrinks the size of the ciphertext by the size of the noise, which is to say $>= 99\%$ using the parameters from above. It also provides an alternative perspective for understanding the problem: The most significant bits of $a s \mod q_r$ represent the approximate location of a point on the lattice. 
+
+The chinese remainder theorem may be used to speed up the encryption process by: \todo{fill in}
 
 \subsection{Security Analysis}
 \todo{}
@@ -161,10 +165,23 @@ The modulus $q$ and the noise $r$ can be selected such that the lower bits of $q
 \todo{}
 
 \section{Fully Homomorphic Encryption Over Finite Fields}
-It is possible to instatiate the scheme from Fully Homomorphic Encryption Over The Integers over finite fields instead. This could shrink the space requirements by a considerable amount.
+The scheme from Fully Homomorphic Encryption Over The Integers can be instaiated over finite fields instead. This could shrink the space requirements by a considerable amount.
 
 \todo{How much}
 
+\section{Backdoored Key Agreement}
+The point $a$ and modulus $q_r$ can be used as backdoored public parameters for an approximate key agreement scheme.
+
+The following cryptosystem can be instantiated with $a$ and $q_r$ as the public parameters. Assuming that the public key for the trapdoor is secure, then $a$ and (uncompressed) $q_r$ are indistinguishable from random and so the backdoor is undetectable.
+
+\subsection{Public Parameter Generation}
+The cryptosystem makes use of a public point $a$ and a public modulus $q$. Both 
+
+%\begin{flalign*}
+
+
+\subsection{Key Generation}
+\subsection{Key Agreement}
 \section{Open Problems}
 \todo{}
 

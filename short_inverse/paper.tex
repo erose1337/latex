@@ -49,52 +49,54 @@ $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $
 
 \section{Short Modular Inverses and Noisy Moduli}
 $a^{-1} (a s + e) = s + a^{-1} e \mod q\\ \\$
-$log(a^{-1} e) < log(q) \rightarrow s + a^{-1} e \mod q = s + a^{-1} e\\ \\$
+$log(a^{-1} e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\ \\$
 $log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\ \\$
 A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with the modular multiplicative inverse of $a$, $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the value will shrink, assuming appropriate sizes for the values involved. With the right parameter sizes, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
 The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge in creating a public-key cryptosystem is how to distribute $a$ such that nobody can recover the short inverse $a^{-1}$.
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $inverse(a^{-1}, q)$, we can distribute $inverse(a^{-1}, q + k)$.
+After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $inverse(a^{-1}, q)$, $inverse(a^{-1}, q + k)$ may be distributed instead.
 
-It is possible to operate on an element of a field (or ring) $q$ as if it were an element of $q + k$ and obtain approximately correct results. Some noise will be present as a result, and the value of the noise can be precisely determined by $r (x / q)$, where $x$ is the value that was reduced modulo $q + r$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $r (x / q)$ is no larger then the error $e$, it will not impede the ability to recover $s$.
+It is possible to operate on an element of a field (or ring) $q$ as if it were an element of $q + k$ and obtain approximately correct results. Some noise will be present as a result, and the value of the noise can be precisely determined by $k (x / q)$, where $x$ is the value that was reduced modulo $q + k$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $k (x / q)$ is no larger then the error $e$, it will not impede the ability to recover $s$.
 
 \section{Public Key Cryptosystem}
-A private key consists of a relatively small value $a^{-1}$ and a secret modulus $q$. A public key consists of the modular inverse of $a^{-1}$ modulo $q$ and a noisy version of the modulus $q_r$.  
+There is a public modulus $q$. \todo{what are the requirements? prime? not? power of 2 ok?}
 
-The public key operation consists of selecting a random point $s$ on the $a$ lattice, adding some large error term $e$, then applying modular reduction by the modulus $q_r$.
+A private key consists of a relatively small random value $a^{-1} $ and a second secret value $k$. $a^{-1}$ should have a power of two as a factor, which can easily be ensured by simply left shifting the value by the required amount. The public key $a$ is the modular multiplicative inverse of $a^{-1}$ modulo $q + k$.
 
-The private key operation consists of multiplication by the short inverse $a^{-1}$ modulo $q$, followed by modulo $a^{-1}$. The multiplication by the short inverse changes the value to the point $e$ on the $a^{-1}$ lattice, with an error of $s$. This shrinks the size of the value to where it is effectively over integers, which allows the recovery of $s$ via simple modular reduction by $a^{-1}$.
+The public key operation consists of selecting a random point $s$ on the $a$ lattice, adding some large random error term $e$, then applying modular reduction by the modulus $q$.
+
+The private key operation consists of multiplication by the short inverse $a^{-1}$ modulo $q + k$, followed by modulo $2^{n}$. The multiplication by the short inverse changes the value to the point $e$ on the $a^{-1}$ lattice, with an error of $s$. This shrinks the size of the value to where it is effectively over integers. The power of two factor in $a^{-1}$ shifts the value of $e$ upwards by $n$ bits, which allows the recovery of $s$ via simple modular reduction by $2^{n}$.
 
 \subsection{Key Generation}
 \begin{flalign*}
-a^{-1} \leftarrow random(a^{-1}_{size})\\
-q \leftarrow random(q_{size})\\
-a \leftarrow inverse(a^{-1}, q)\\
-q_r \leftarrow q + random(r_{size})\\
-key_{private} \leftarrow a^{-1},\ q\\
-key_{public} \leftarrow a, q_r
+a^{-1} \leftarrow random(a^{-1}_{size}) << n\\
+k \leftarrow random(k_{size})\\
+a \leftarrow inverse(a^{-1}, q + k)\\
+key_{private} \leftarrow a^{-1},\ k\\
+key_{public} \leftarrow a
 \end{flalign*}
 
 \subsection{Public Key Operation}
 \begin{flalign*}
 s \leftarrow random(s_{size})\\
 e \leftarrow random(e_{size})\\
-c \leftarrow a s + e \mod q_r
+c \leftarrow a s + e \mod q\\
+s_{lsb} \leftarrow s \mod 2^{n}
 \end{flalign*}
 
 \subsection{Private Key Operation}
 \begin{flalign*}
-s \leftarrow a^{-1} c \mod q \mod a^{-1}
+s_{lsb} \leftarrow a^{-1} c \mod q + k \mod 2^{n}
 \end{flalign*}
 
 \subsection{Homomorphism}
 Ciphertexts may be added together, and the result upon decryption will be equal to the sum of the plaintexts.
 \begin{flalign*}
-c_1 \leftarrow a s_1 + e_1 \mod q_r\\
-c_2 \leftarrow a s_2 + e_2 \mod q_r\\
+c_1 \leftarrow a s_1 + e_1 \mod q\\
+c_2 \leftarrow a s_2 + e_2 \mod q\\
 c_3 \leftarrow c_1 + c_2\\
-s_3 \leftarrow a^{-1} c_3 \mod q \mod a^{-1}\\
+s_3 \leftarrow a^{-1} c_3 \mod q + k \mod 2^{n}\\
 s_3 \equiv s_1 + s_2
 \end{flalign*}
 
@@ -106,59 +108,42 @@ The sizes of the parameters need to be selected carefully to ensure that:\\
 The first requirement is relatively simple to fulfill, and all the parameter sizes can be described by a few simple expressions. It is necessary to include some padding bits to ensure a negligible probability of failure for the private key operation.\\
 
 The requirements for correctness are:\\
-$log(a^{-1}) > log(s)\\$
 $log(e) <  log(q) - log(a^{-1})\\$
 $log(r) < log(e) - log(s)$
 
-The second requirement can be trivially fulfilled by selecting $log(e) >= log(q)$, as then the cipher is just a one time pad. Clearly, the construction here cannot be instantiated with such parameters while still fulfilling the first requirement of correctness, as we specifically require $log(e) < log(q)$. 
+The second requirement of security can be trivially fulfilled by selecting $log(e) >= log(q)$, as then the cipher is just a one time pad. Clearly, the construction here cannot be instantiated with such parameters while still fulfilling the first requirement of correctness, as we specifically require $log(e) < log(q)$. 
 
-However, the algorithm can be instantiated with very large error terms relative to the size of the modulus. The limiting factor of the size of $e$ is how large $s$ is. As a secret value, it needs to be large enough to preclude an adversaries ability to guess it. This implies that for most uses, $s$ will be a maximum of 256 bits in size. The size of $q$ and $e$ can then be set such that the $s$ term becomes neglible in size and $e$ becomes approximately the same size as $q$.
+However, the algorithm can be instantiated with very large error terms relative to the size of the modulus. The limiting factor of the size of $e$ is the size of $a^{-1}$. As a secret value, it needs to be large enough to preclude an adversaries ability to guess it. This implies that for most uses, $a^{-1}$ will be a maximum of 256 bits in size, plus $n$ zero bits which can be shifted in/out as needed.
 
 The following algorithm may be used to calculate parameter sizes that fulfill the requirements of correctness. The size of $s$, the error coverage (the size of $e$ relative to the size of $q$), and the amount of padding are parameterized and configurable. The values indicate the size for the appropriate parameter in  bytes, except for the error coverage, which is expressed as a percent.
 
-\todo{make it look nicer}
-\begin{flalign*}
-    base_{size} \leftarrow s_{size}\\
-    e_{size} \leftarrow base_{size} - 1\\
-    while\ (e_{size} - padding) / base_{size} < error_{coverage}:\\
-        base_{size} \leftarrow 2 base_{size}\\
-        e_{size} \leftarrow base_{size} - 1\\
-    base_{size} \leftarrow base_{size} s_{size}\\
-    e_{size} \leftarrow (e_{size} s_{size}) - 1 - padding\\   
-    a^{-1}_{size} \leftarrow s_{size} + padding\\
-    q_{size} \leftarrow base_{size}\\   
-    r_{size} \leftarrow e_{size} - s_{size} - padding  \\
-    output\ a^{-1}_{size},\ key_{size},\ error_{size},\ q_{size},\ r_{size}
-\end{flalign*}    
+\todo{parameter generation formula}
+%\begin{flalign*}
+%\end{flalign*}    
 
-For a 32-byte (256-bit) $s$ value, large error coverage $e_{size} / q_{size} >= .99$ and a 4-byte adjustment for padding, we have the following parameter sizes:
+For a 32-byte (256-bit) $s_{lsb}$ value and a 4-byte adjustment for padding, we have the following parameter sizes:
+\todo{parameter sizes}
+%\begin{flalign*}
+%\end{flalign*}
 
-\begin{flalign*}
-a^{-1}_{size} \leftarrow 36\\
-s_{size} \leftarrow 32\\
-e_{size} \leftarrow 16347\\
-q_{size} \leftarrow 16384\\
-r_{size} \leftarrow 16311
-\end{flalign*}
+For a 128-bit $s_{lsb}$ value and a 4-byte adjustment for padding, we have the following parameter sizes:
 
-For a 128-bit $s$ value and the same error coverage $e_{size} / q_{size} >= .99$ and 4-byte adjustment for padding, we have the following parameter sizes:
-
-\begin{flalign*}
-a^{-1}_{size} \leftarrow 20\\
-s_{size} \leftarrow 16\\
-e_{size} \leftarrow 8171\\
-q_{size} \leftarrow 8192\\
-r_{size} \leftarrow 8151
-\end{flalign*}
+%\begin{flalign*}
+\todo{parameter sizes}
+%\end{flalign*}
 
 \subsection{Optimization}
-The modulus $q$ and the noise $r$ can be selected such that the lower bits of $q_r$ are all zero. This can shrink the size of the modulus by $r_{size}$ bytes, as the zeros can be easily compressed. The compression/decompression algorithms are simply right shifting and left shifting, respectively. This effectively shrinks the size of the public key by almost half.
+There is potential for space and time optimizations.
 
-Similarly, the least significant bits of the ciphertext may simply be discarded instead of adding an error term. This shrinks the size of the ciphertext by the size of the noise, which is to say $>= 99\%$ using the parameters from above. It also provides an alternative perspective for understanding the problem: The most significant bits of $a s \mod q_r$ represent the approximate location of a point on the lattice. 
+The power of two factor in $a^{-1}$ does not need to be stored, and can be shifted in/out of place as needed. This represents a space saving of $n$ bits.
+
+The addition of a random error term $e$ can be replaced with zeroization via right shifting. This has numerous benefits. The first is that the public key operation only requires a modular multiplication and right shift, no addition circuit is required. There is one less (large) random number to generate. Finally, the ciphertext $c$ will be compressed by $log(e) - padding$ bits.
 
 The chinese remainder theorem may be used to speed up the encryption process by: \todo{fill in}
 
 \subsection{Security Analysis}
+The security of the key generation function appears to be related to the modular inversion hidden number problem.
+The security of the public key operation appears to be related to lattice problems
 \todo{}
 
 \subsection{Metrics}
@@ -175,7 +160,7 @@ The point $a$ and modulus $q_r$ can be used as backdoored public parameters for 
 The following cryptosystem can be instantiated with $a$ and $q_r$ as the public parameters. Assuming that the public key for the trapdoor is secure, then $a$ and (uncompressed) $q_r$ are indistinguishable from random and so the backdoor is undetectable.
 
 \subsection{Public Parameter Generation}
-The cryptosystem makes use of a public point $a$ and a public modulus $q$. Both 
+The cryptosystem makes use of a public point $a$ and a public modulus $q$. 
 
 %\begin{flalign*}
 

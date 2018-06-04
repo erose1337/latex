@@ -1,0 +1,66 @@
+\documentclass[preprint]{iacrtrans}
+\usepackage[utf8]{inputenc}
+
+% Select what to do with todonotes: 
+% \usepackage[disable]{todonotes} % notes not showed
+\usepackage[draft,color=orange!20!white,linecolor=orange,textwidth=3cm,colorinlistoftodos]{todonotes}   % notes showed
+\setlength{\marginparwidth}{3cm}
+\usepackage{graphicx}
+\usepackage{soul}
+\graphicspath{{images/}} % end dirs with `/'
+% \usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows}
+\usetikzlibrary{crypto.symbols}
+\tikzset{shadows=no}        % Option: add shadows to XOR, ADD, etc.
+
+\author{Ella Rose\inst{1}}
+\institute{Paso Robles, California \email{python_pride@protonmail.com}}
+\title[\texttt 12/21/2017]{\texttt 12/21/2017}
+
+\begin{document}
+
+\maketitle
+
+% use optional argument because the \LaTeX command breaks the PDF keywords
+\keywords[AEAD, Permutation]{AEAD, Permutation}
+
+\begin{abstract}
+  This paper defines an authenticated encryption with associated data (AEAD) construction built using a generic psuedorandom permutation (PRP) and message authentication code (MAC). The authentication mechanism is very efficient in regards to message size, as only the associated data needs to be processed by the MAC algorithm. As a consequence of this, the PRP and MAC may be computed in parallel.
+\end{abstract}
+
+\todototoc
+\listoftodos
+
+\section{Introduction}
+ Psuedorandom permutations are a core building block of modern cryptography. They are utilized to create block ciphers in Substitution-Permutation networks, as well as to create hash functions and AEAD schemes via the Sponge construction. By separating the design of cipher and hash constructions from the design of permutations, we can simplify the responsibilities of each component. The permutation holds the responsibility to be designed to resist all known generic attack frameworks, such as linear and differential cryptanalysis. 
+
+The construction defined here is an AEAD construction, built from a PRP and a MAC. The authentication mechanism is very efficient with regards to message length. The message is not processed by the MAC algorithm, but the authenticity and integrity of the message is still protected by the authentication tag that the MAC produces. This is accomplished by the propagation of errors that occurs if ciphertexts are manipulated and then the decryption operation applied.
+
+\section{Definitions}
+\todo{Define the notation used in this paper}\\
+\todo{Define how the state is laid out and indexed/addressed}\\
+We use $\oplus$ to denote XOR, $\land$ to denote AND, and $\lll$ to denote bitwise rotation left...
+
+\section{Algorithm}
+\todo{Define the algorithm in detail}\\
+\todo{Describe the layout of the state}\\
+\todo{Define the round function or permutation}
+
+\section{Design\ Rationale}
+\todo{Explain the reasoning for each step of the algorithm}\\
+\todo{Explain how constants are generated and what purpose they serve}\\
+\todo{Describe why the linear and non-linear layers were designed/chosen}\\
+\todo{Justify numerical design decisions, such as word transpositions indices and rotation amounts}\\
+
+\section{Conclusion}
+ We define an N-bit permutation that is oriented towards PLATFORM TYPE. \todo{Fill in values for block size and platform type} 
+\todo{Concisely summarize the rest of the paper in a paragraph or two}
+
+\end{document}
+

@@ -48,16 +48,19 @@ $random(size)$ indicates generation of a random $size$-bit integer\\
 $inverse(a, b)$ indicates computation of the modular multiplicative inverse of $a$ modulo $b$\\
 
 \section{Short Modular Inverses and Noisy Moduli}
+A short modular inverse maps an element of a finite field (or ring?) modulo $q$ to an integer smaller then $q$.
+
 $a^{-1} (a s + e) = s + a^{-1} e \mod q\\ \\$
 $log(a^{-1} e) < log(q) \rightarrow s + a^{-1} e \mod q \equiv s + a^{-1} e\\ \\$
 $log(s) < log(a^{-1}) \rightarrow s = s + a^{-1} e \mod a^{-1}\\ \\$
 A point $a s + e \mod q$  can be changed to a point $s + a^{-1} e \mod q$ via multiplication with the modular multiplicative inverse of $a$, $a^{-1}$. If $a^{-1}$ is smaller then $a$, then the value will shrink, assuming appropriate sizes for the values involved. With the right parameter sizes, a point $a s + e \mod q$ can be changed to the point $s + a^{-1} e$. The former is over finite fields, while the latter is over integers. It is trivial to solve for $s$ when the problem is over integers.
 
-The value $a^{-1}$ can serve as trapdoor information, but it can be trivially recovered from $a$ and $q$. The challenge in creating a public-key cryptosystem is how to distribute $a$ such that nobody can recover the short inverse $a^{-1}$.
+In this form, the algorithm is only secure as a secret key cryptosystem. While it is possible to instantiate a public key scheme with such a cipher, there is a more efficient and direct construction for turning the mechanism into a public key cryptosystem.
 
-After having tried many combinations of techniques, the most promising answer appears to be the use of a noisy modulus. Instead of distributing $inverse(a^{-1}, q)$, $inverse(a^{-1}, q + k)$ may be distributed instead.
+\subsection{Noisy Moduli}
+It is possible to operate on an element of a field (or ring) $q$ as if it were an element of $q + k$ and obtain approximately correct results. Some noise will be present as a result, and the magnitude of the noise can be precisely determined by $k (x / q)$, where $x$ is the value that was reduced modulo $q + k$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $k (x / q)$ is no larger then the error threshold for $e$, it will not impede or complicate any further procedures.
 
-It is possible to operate on an element of a field (or ring) $q$ as if it were an element of $q + k$ and obtain approximately correct results. Some noise will be present as a result, and the value of the noise can be precisely determined by $k (x / q)$, where $x$ is the value that was reduced modulo $q + k$. The size of the noise scales quickly as the difference in size between $x$ and $q$ becomes large. As long as the noise $k (x / q)$ is no larger then the error $e$, it will not impede the ability to recover $s$.
+Instead of distributing $inverse(a^{-1}, q)$, $inverse(a^{-1}, q + k)$ may be distributed instead.
 
 \section{Public Key Cryptosystem}
 There is a public modulus $q$. \todo{what are the requirements? prime? not? power of 2 ok?}
